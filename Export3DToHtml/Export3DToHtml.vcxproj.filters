@@ -18,5 +18,13 @@
     <ClCompile Include="Export3DToHtml.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="HtmlTemplateBuilder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="HtmlTemplateBuilder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -4,4 +4,7 @@
     <LocalDebuggerWorkingDirectory>$(OutDir)</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LocalDebuggerCommandArguments>C:\temp\helloworld.stp ..\..\..\template html C:\temp\helloworld.html</LocalDebuggerCommandArguments>
+  </PropertyGroup>
 </Project>

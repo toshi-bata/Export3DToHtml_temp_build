@@ -27,6 +27,8 @@
 #include <hoops_license.h>
 #include "../common.hpp"
 #include <iostream>
+#include <sstream>
+#include "HtmlTemplateBuilder.h"
 
 //######################################################################################################################
 // Usage: All parameters are defaultable.
@@ -95,7 +97,15 @@ int main(int iArgc, A3DUTF8Char** ppcArgv)
 #endif
 	}
 
-	A3DSDKHOOPSExchangeLoader sHoopsExchangeLoader(_T(HOOPS_BINARY_DIRECTORY), HOOPS_LICENSE);
+	std::wstringstream bin_dir;
+	std::wstring buffer;
+	buffer.resize(MAX_PATH);
+	if (GetEnvironmentVariable(L"HPUBLISH_INSTALL_DIR", &buffer[0], static_cast<DWORD>(buffer.size())))
+		bin_dir << buffer.data() << L"/bin/win64_v142\0";
+	else
+		bin_dir << "\0";
+
+	A3DSDKHOOPSExchangeLoader sHoopsExchangeLoader(bin_dir.str().data(), HOOPS_LICENSE);
 	CHECK_RET(sHoopsExchangeLoader.m_eSDKStatus)
 	CHECK_RET(A3DDllSetCallbacksMemory(CheckMalloc, CheckFree));
 	CHECK_RET(A3DDllSetCallbacksReport(PrintLogMessage, PrintLogWarning, PrintLogError))
@@ -118,14 +128,40 @@ int main(int iArgc, A3DUTF8Char** ppcArgv)
 			sExport.m_sExportHtmlData.m_bIncludeMeasurementInformation = true;
 
 #if defined _MSC_VER && (defined _UNICODE || defined UNICODE)
-			std::vector< A3DUTF8Char> acFileNameUTF8 ;
-			A3DUniChar* acFileNameUni = (iArgc > 2) ? ppcArgv[2] : const_cast<A3DUniChar*>(IN_FILE_HTMLTEMPLATE);
-			acFileNameUTF8.resize(wcslen(acFileNameUni) * sizeof(A3DUniChar));
-			A3DMiscUTF16ToUTF8(acFileNameUni, acFileNameUTF8.data());
-			sExport.m_sExportHtmlData.m_pcHtmlTemplateName = acFileNameUTF8.data();
+			std::vector< A3DUTF8Char> acTempFilePathUTF8 ;
+			A3DUniChar* acTempDirUni;
+			A3DUniChar acTempFilePathUni[MAX_PATH];
+			if (iArgc > 2)
+			{
+				acTempDirUni = ppcArgv[2];
+				wcscpy(acTempFilePathUni, ppcArgv[2]);
+				wcscat(acTempFilePathUni, _T("\\_htmltemplate.html"));
+			}
+			else
+			{
+				acTempDirUni = const_cast<A3DUniChar*>(IN_FILE_HTMLTEMPLATE);
+				wcscpy(acTempFilePathUni, const_cast<A3DUniChar*>(IN_FILE_HTMLTEMPLATE));
+				wcscat(acTempFilePathUni, _T("\\_htmltemplate.html"));
+			}
+
+			acTempFilePathUTF8.resize(wcslen(acTempFilePathUni) * sizeof(A3DUniChar));
+			A3DMiscUTF16ToUTF8(acTempFilePathUni, acTempFilePathUTF8.data());
+			sExport.m_sExportHtmlData.m_pcHtmlTemplateName = acTempFilePathUTF8.data();
 #else
 			sExport.m_sExportHtmlData.m_pcHtmlTemplateName = (A3DUTF8Char *)(iArgc > 2 ? ppcArgv[2] : IN_FILE_HTMLTEMPLATE);
 #endif
+
+			// create HTML template file
+			HtmlTemplateBuilder createTemplate;
+			createTemplate.options.standardUI = true;
+			createTemplate.options.toolBar = false;
+			createTemplate.options.axisTriad = true;
+			createTemplate.options.navCube = true;
+			createTemplate.options.customScript = false;
+			createTemplate.options.customScriptBeforeStartViewer = false;
+			createTemplate.options.customBody = false;
+			createTemplate.Create(acTempDirUni);
+
 			// conversion is performed
 			CHECK_RET(A3DAsmModelFileExportToHTMLFile(psModelFile, &sExport.m_sExportHtmlData, sExport.GetFilePath()));
 		}
