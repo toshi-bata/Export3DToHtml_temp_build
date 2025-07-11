@@ -71,15 +71,22 @@ int main(int iArgc, A3DUTF8Char** ppcArgv)
 
 	if (iArgc > 6)
 	{
-		printf("Usage: Export3DToHtml [INPUT] [HTML] [FORMAT] [OUTPUT] [LOG_FILE]\nAll parameters are defaultable.\nSee source file for details.\n");
+		printf("Usage: Export3DToHtml [INPUT] [HTML_TEMPLATE_DIR] [OPTIONS] [OUTPUT] [LOG_FILE]\nAll parameters are defaultable.\nSee source file for details.\n");
 		return 0;
 	}
 
-	bool bExportAsHtml = false;
+	bool bExportAsHtml = true;
+	//if (iArgc > 3)
+	//	bExportAsHtml = (MY_STRCMP(ppcArgv[3], "html") == 0);
+	//else
+	//	bExportAsHtml = (MY_STRCMP(IN_EXPORTFORMAT, "html") == 0);
+
+	// Set options
+	A3DUniChar* acOptions;
 	if (iArgc > 3)
-		bExportAsHtml = (MY_STRCMP(ppcArgv[3], "html") == 0);
-	else
-		bExportAsHtml = (MY_STRCMP(IN_EXPORTFORMAT, "html") == 0);
+		acOptions = ppcArgv[3];
+	if (7 > wcslen(acOptions))
+		acOptions = _T("1000111");
 
 	if (!(iArgc >= 6 && stdout != GetLogFile(ppcArgv[5])))
 	{
@@ -129,20 +136,29 @@ int main(int iArgc, A3DUTF8Char** ppcArgv)
 
 #if defined _MSC_VER && (defined _UNICODE || defined UNICODE)
 			std::vector< A3DUTF8Char> acTempFilePathUTF8 ;
-			A3DUniChar* acTempDirUni;
+			A3DUniChar acTempDirUni[MAX_PATH];
 			A3DUniChar acTempFilePathUni[MAX_PATH];
 			if (iArgc > 2)
 			{
-				acTempDirUni = ppcArgv[2];
-				wcscpy(acTempFilePathUni, ppcArgv[2]);
-				wcscat(acTempFilePathUni, _T("\\_htmltemplate.html"));
+				wcscpy(acTempDirUni, ppcArgv[2]);
 			}
 			else
 			{
-				acTempDirUni = const_cast<A3DUniChar*>(IN_FILE_HTMLTEMPLATE);
-				wcscpy(acTempFilePathUni, const_cast<A3DUniChar*>(IN_FILE_HTMLTEMPLATE));
-				wcscat(acTempFilePathUni, _T("\\_htmltemplate.html"));
+				wcscpy(acTempDirUni, const_cast<A3DUniChar*>(IN_FILE_HTMLTEMPLATE));
 			}
+
+			int lastId = wcslen(acTempDirUni) - 1;
+
+#ifdef _MSC_VER
+			if ('\\' != acTempDirUni[lastId])
+				wcscat(acTempDirUni, _T("\\"));
+#else
+			if ('/' != acTempDirUni[lastId])
+				wcscat(acTempDirUni, _T("/"));
+#endif
+
+			wcscpy(acTempFilePathUni, acTempDirUni);
+			wcscat(acTempFilePathUni, _T("_htmltemplate.html"));
 
 			acTempFilePathUTF8.resize(wcslen(acTempFilePathUni) * sizeof(A3DUniChar));
 			A3DMiscUTF16ToUTF8(acTempFilePathUni, acTempFilePathUTF8.data());
@@ -153,13 +169,13 @@ int main(int iArgc, A3DUTF8Char** ppcArgv)
 
 			// create HTML template file
 			HtmlTemplateBuilder createTemplate;
-			createTemplate.options.standardUI = true;
-			createTemplate.options.toolBar = false;
-			createTemplate.options.axisTriad = true;
-			createTemplate.options.navCube = true;
-			createTemplate.options.customScript = false;
-			createTemplate.options.customScriptBeforeStartViewer = false;
-			createTemplate.options.customBody = false;
+			'0' == acOptions[0] ? createTemplate.options.standardUI = false : createTemplate.options.standardUI = true;
+			'0' == acOptions[1] ? createTemplate.options.toolBar = false : createTemplate.options.toolBar = true;
+			'0' == acOptions[2] ? createTemplate.options.axisTriad = false : createTemplate.options.axisTriad = true;
+			'0' == acOptions[3] ? createTemplate.options.navCube = false : createTemplate.options.navCube = true;
+			'0' == acOptions[4] ? createTemplate.options.customScript = false : createTemplate.options.customScript = true;
+			'0' == acOptions[5] ? createTemplate.options.customScriptBeforeStartViewer = false : createTemplate.options.customScriptBeforeStartViewer = true;
+			'0' == acOptions[6] ? createTemplate.options.customBody = false : createTemplate.options.customBody = true;
 			createTemplate.Create(acTempDirUni);
 
 			// conversion is performed
