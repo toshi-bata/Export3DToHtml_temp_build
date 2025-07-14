@@ -5,6 +5,6 @@
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LocalDebuggerCommandArguments>"C:\SDK\Exchange_Publish\HOOPS_Exchange_Publish_2025.4.0\samples\data\catiaV5\CV5_Micro_engine\_micro engine.CATProduct" ..\..\..\template 0100111 C:\temp\helloworld.html</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>"$(HPUBLISH_INSTALL_DIR)\samples\data\catiaV5\CV5_Micro_engine\_micro engine.CATProduct" ..\..\..\template 0011111 C:\temp\microengine.html</LocalDebuggerCommandArguments>
   </PropertyGroup>
 </Project>
