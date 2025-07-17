@@ -1,4 +1,5 @@
 #pragma once
+#include <A3DSDKTypes.h>
 
 struct Options
 {
@@ -16,7 +17,7 @@ class HtmlTemplateBuilder
 public:
 	HtmlTemplateBuilder();
 	~HtmlTemplateBuilder();
-	void Create(const wchar_t *path);
+	void Create(const A3DUniChar*path);
 
 	Options options;
 };

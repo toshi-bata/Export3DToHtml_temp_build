@@ -56,6 +56,16 @@
 #	define OUT_FILE_HTML          SAMPLES_PUBLISH_HTML_DIRECTORY"/htmlsinglefile/helloworld.html"
 #endif
 
+#ifndef _MSC_VER
+#include <string.h>
+#define TCHAR char
+#define _tcscpy strcpy
+#define _tcslen strlen
+#define _tcscmp strcmp
+#define _tcscat strcat
+#define _stprintf sprintf
+#endif
+
 bool ReadPdfFileWithPrcStream(A3DImport const& a_sImport, A3DAsmModelFile*& a_psModelFile);
 
 //######################################################################################################################
@@ -76,18 +86,16 @@ int main(int iArgc, A3DUTF8Char** ppcArgv)
 	}
 
 	bool bExportAsHtml = true;
-	//if (iArgc > 3)
-	//	bExportAsHtml = (MY_STRCMP(ppcArgv[3], "html") == 0);
-	//else
-	//	bExportAsHtml = (MY_STRCMP(IN_EXPORTFORMAT, "html") == 0);
 
 	// Set options
-	A3DUniChar* acOptions;
-	if (iArgc > 3)
-		acOptions = ppcArgv[3];
-	if (7 > wcslen(acOptions))
-		acOptions = _T("1000111");
+	A3DUniChar acOptions[10] = { 0 };
 
+	if (iArgc > 3)
+		_tcscpy(acOptions, ppcArgv[3]);
+
+	if (7 > _tcslen(acOptions))
+		_tcscpy(acOptions, _T("1000111"));
+	
 	if (!(iArgc >= 6 && stdout != GetLogFile(ppcArgv[5])))
 	{
 		// if no log file specified on command line or redirection failed, fall back to local file
@@ -104,6 +112,7 @@ int main(int iArgc, A3DUTF8Char** ppcArgv)
 #endif
 	}
 
+#ifdef _MSC_VER
 	std::wstringstream bin_dir;
 	std::wstring buffer;
 	buffer.resize(MAX_PATH);
@@ -113,6 +122,9 @@ int main(int iArgc, A3DUTF8Char** ppcArgv)
 		bin_dir << "\0";
 
 	A3DSDKHOOPSExchangeLoader sHoopsExchangeLoader(bin_dir.str().data(), HOOPS_LICENSE);
+#else
+	A3DSDKHOOPSExchangeLoader sHoopsExchangeLoader(_T(HOOPS_BINARY_DIRECTORY), HOOPS_LICENSE);
+#endif
 	CHECK_RET(sHoopsExchangeLoader.m_eSDKStatus)
 	CHECK_RET(A3DDllSetCallbacksMemory(CheckMalloc, CheckFree));
 	CHECK_RET(A3DDllSetCallbacksReport(PrintLogMessage, PrintLogWarning, PrintLogError))
@@ -134,37 +146,33 @@ int main(int iArgc, A3DUTF8Char** ppcArgv)
 			A3DExport sExport(iArgc > 4 ? ppcArgv[4] : OUT_FILE_HTML);
 			sExport.m_sExportHtmlData.m_bIncludeMeasurementInformation = true;
 
-#if defined _MSC_VER && (defined _UNICODE || defined UNICODE)
-			std::vector< A3DUTF8Char> acTempFilePathUTF8 ;
 			A3DUniChar acTempDirUni[MAX_PATH];
 			A3DUniChar acTempFilePathUni[MAX_PATH];
 			if (iArgc > 2)
-			{
-				wcscpy(acTempDirUni, ppcArgv[2]);
-			}
+				_tcscpy(acTempDirUni, ppcArgv[2]);
 			else
-			{
-				wcscpy(acTempDirUni, const_cast<A3DUniChar*>(IN_FILE_HTMLTEMPLATE));
-			}
+				_tcscpy(acTempDirUni, const_cast<A3DUniChar*>(IN_FILE_HTMLTEMPLATE));
 
-			int lastId = wcslen(acTempDirUni) - 1;
-
-#ifdef _MSC_VER
+			int lastId = _tcslen(acTempDirUni) - 1;
+			
+#if defined _MSC_VER && (defined _UNICODE || defined UNICODE)
 			if ('\\' != acTempDirUni[lastId])
-				wcscat(acTempDirUni, _T("\\"));
+				_tcscat(acTempDirUni, _T("\\"));
 #else
 			if ('/' != acTempDirUni[lastId])
-				wcscat(acTempDirUni, _T("/"));
+				_tcscat(acTempDirUni, _T("/"));
 #endif
+			
+			_tcscpy(acTempFilePathUni, acTempDirUni);
+			_tcscat(acTempFilePathUni, _T("_htmltemplate.html"));
 
-			wcscpy(acTempFilePathUni, acTempDirUni);
-			wcscat(acTempFilePathUni, _T("_htmltemplate.html"));
-
-			acTempFilePathUTF8.resize(wcslen(acTempFilePathUni) * sizeof(A3DUniChar));
+#if defined _MSC_VER && (defined _UNICODE || defined UNICODE)
+			std::vector< A3DUTF8Char> acTempFilePathUTF8;
+			acTempFilePathUTF8.resize(_tcslen(acTempFilePathUni) * sizeof(A3DUniChar));
 			A3DMiscUTF16ToUTF8(acTempFilePathUni, acTempFilePathUTF8.data());
 			sExport.m_sExportHtmlData.m_pcHtmlTemplateName = acTempFilePathUTF8.data();
 #else
-			sExport.m_sExportHtmlData.m_pcHtmlTemplateName = (A3DUTF8Char *)(iArgc > 2 ? ppcArgv[2] : IN_FILE_HTMLTEMPLATE);
+			sExport.m_sExportHtmlData.m_pcHtmlTemplateName = acTempFilePathUni;
 #endif
 
 			// create HTML template file

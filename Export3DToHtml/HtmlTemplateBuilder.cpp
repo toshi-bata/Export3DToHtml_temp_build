@@ -2,32 +2,51 @@
 #include <fstream>
 #include <string>
 #include <iostream>
+#include <cstring>
+
+#ifdef _MSC_VER
 #include <tchar.h>
+#define MY_TEXT(x) _T(x)
+#else
+#include <string.h>
+#define TCHAR char
+#define MY_TEXT(x) x
+#define _tcscpy strcpy
+#define _tcscat strcat
+#define _stprintf sprintf
+#endif
 
 using namespace std;
-#define HEAD_HTML							_T("01_head.html")
-#define SCRIPT_JQUERY_HTML					_T("02_script_jquery.html")
-#define SCRIPT_UI_HTML						_T("03_script_UI_interaction.html")
-#define SCRIPT_HWV_HTML						_T("04_script_HWV.html")
-#define SCRIPT_JQUERY_MINICOLORS_HTML		_T("05_script_jquery_minicolors.html")
-#define SCRIPT_HWV_SERVER_HTML				_T("06_script_HWV_server.html")
-#define SCRIPT_HWV_SAMPLE_HTML				_T("07_script_HWV_sample.html")
-#define STYLE_MODELTREE_HTML				_T("08_style_modelTree.html")
-#define STYLE_TOOLBAR_HTML					_T("09_style_toolBar.html")
-#define STYLE_COMMON_HTML					_T("10_style_common.html")
-#define STYLE_JQUERY_HTML					_T("11_style_jquery.html")
-#define STYLE_VIEWER_DIALOGS_HTML			_T("12_style_viewer_dialogs.html")
-#define STYLE_JQUERY_MINICOLORS_HTML		_T("13_style_jquery_minicolors.html")
-#define STYLE_RELATIONSHIPA_HTML			_T("14_style_relationships.html")
-#define CUSTOM_STYLE_SCRIPT_HTML			_T("15_custom_style_script.html")
-#define SCRIPT_START_VIEWER_HTML			_T("16_script_start_viewer.html")
-#define CUSTOM_SCRIPT_BEFORE_START_VIEWER	_T("17_custom_script_before_start_viewer.js")
-#define BODY_TOOLBAR_HTML					_T("18_body_toolbar.html")
-#define BODY_VIEWERSETTINGS_HTML			_T("19_body_viewerSettings.html")
-#define BODY_SNAPSHOT_DIALOG_HTML			_T("20_body_snapshot_dialog.html")
-#define CUSTOM_BODY_HTML					_T("21_custom_body.html")
+#define TEMP_FILE_NAME						MY_TEXT("_htmltemplate.html")
+#define HEAD_HTML							MY_TEXT("01_head.html")
+#define SCRIPT_JQUERY_HTML					MY_TEXT("02_script_jquery.html")
+#define SCRIPT_UI_HTML						MY_TEXT("03_script_UI_interaction.html")
+#define SCRIPT_HWV_HTML						MY_TEXT("04_script_HWV.html")
+#define SCRIPT_JQUERY_MINICOLORS_HTML		MY_TEXT("05_script_jquery_minicolors.html")
+#define SCRIPT_HWV_SERVER_HTML				MY_TEXT("06_script_HWV_server.html")
+#define SCRIPT_HWV_SAMPLE_HTML				MY_TEXT("07_script_HWV_sample.html")
+#define STYLE_MODELTREE_HTML				MY_TEXT("08_style_modelTree.html")
+#define STYLE_TOOLBAR_HTML					MY_TEXT("09_style_toolBar.html")
+#define STYLE_COMMON_HTML					MY_TEXT("10_style_common.html")
+#define STYLE_JQUERY_HTML					MY_TEXT("11_style_jquery.html")
+#define STYLE_VIEWER_DIALOGS_HTML			MY_TEXT("12_style_viewer_dialogs.html")
+#define STYLE_JQUERY_MINICOLORS_HTML		MY_TEXT("13_style_jquery_minicolors.html")
+#define STYLE_RELATIONSHIPA_HTML			MY_TEXT("14_style_relationships.html")
+#define CUSTOM_STYLE_SCRIPT_HTML			MY_TEXT("15_custom_style_script.html")
+#define SCRIPT_START_VIEWER_HTML			MY_TEXT("16_script_start_viewer.html")
+#define CUSTOM_SCRIPT_BEFORE_START_VIEWER	MY_TEXT("17_custom_script_before_start_viewer.js")
+#define BODY_TOOLBAR_HTML					MY_TEXT("18_body_toolbar.html")
+#define BODY_VIEWERSETTINGS_HTML			MY_TEXT("19_body_viewerSettings.html")
+#define BODY_SNAPSHOT_DIALOG_HTML			MY_TEXT("20_body_snapshot_dialog.html")
+#define CUSTOM_BODY_HTML					MY_TEXT("21_custom_body.html")
 
-void addFile(ofstream &ofs, const wchar_t *inFile)
+void strmarge(const A3DUniChar*in_str1, const A3DUniChar*in_str2, A3DUniChar* out_str)
+{
+	_tcscpy(out_str, in_str1);
+	_tcscat(out_str, in_str2);
+}
+
+void addFile(ofstream &ofs, const A3DUniChar*inFile)
 {
 	ifstream ifs;
 	string str;
@@ -48,91 +67,75 @@ HtmlTemplateBuilder::~HtmlTemplateBuilder()
 {
 }
 
-void HtmlTemplateBuilder::Create(const wchar_t *templateDirPath)
+void HtmlTemplateBuilder::Create(const A3DUniChar*templateDirPath)
 {
 	ofstream ofs;
 	ifstream ifs;
 	string str;
-	wchar_t path[2048];
-
-	wcscpy(path, templateDirPath);
-	wcscat(path, _T("_htmltemplate.html"));
+	A3DUniChar path[2048];
+	
+	strmarge(templateDirPath, TEMP_FILE_NAME, path);
 	ofs.open(path, ios::out | ios::trunc);
 	
-	wcscpy(path, templateDirPath);
-	wcscat(path, HEAD_HTML);
+	strmarge(templateDirPath, HEAD_HTML, path);
 	addFile(ofs, path);
 
-	wcscpy(path, templateDirPath);
-	wcscat(path, SCRIPT_JQUERY_HTML);
+	strmarge(templateDirPath, SCRIPT_JQUERY_HTML, path);
 	addFile(ofs, path);
 
-	wcscpy(path, templateDirPath);
-	wcscat(path, SCRIPT_UI_HTML);
+	strmarge(templateDirPath, SCRIPT_UI_HTML, path);
 	addFile(ofs, path);
 
-	wcscpy(path, templateDirPath);
-	wcscat(path, SCRIPT_HWV_HTML);
+	strmarge(templateDirPath, SCRIPT_HWV_HTML, path);
 	addFile(ofs, path);
 
-	wcscpy(path, templateDirPath);
-	wcscat(path, SCRIPT_JQUERY_MINICOLORS_HTML);
+	strmarge(templateDirPath, SCRIPT_JQUERY_MINICOLORS_HTML, path);
 	addFile(ofs, path);
 
-	wcscpy(path, templateDirPath);
-	wcscat(path, SCRIPT_HWV_SERVER_HTML);
+	strmarge(templateDirPath, SCRIPT_HWV_SERVER_HTML, path);
 	addFile(ofs, path);
 
-	wcscpy(path, templateDirPath);
-	wcscat(path, SCRIPT_HWV_SAMPLE_HTML);
+	strmarge(templateDirPath, SCRIPT_HWV_SAMPLE_HTML, path);
 	addFile(ofs, path);
 
 	if (options.standardUI) {
-		wcscpy(path, templateDirPath);
-		wcscat(path, STYLE_MODELTREE_HTML);
+		strmarge(templateDirPath, STYLE_MODELTREE_HTML, path);
 		addFile(ofs, path);
 	}
 
 	if (options.standardUI || options.toolBar) {
-		wcscpy(path, templateDirPath);
-		wcscat(path, STYLE_TOOLBAR_HTML);
+		strmarge(templateDirPath, STYLE_TOOLBAR_HTML, path);
 		addFile(ofs, path);
 	}
 
-	wcscpy(path, templateDirPath);
-	wcscat(path, STYLE_COMMON_HTML);
+	strmarge(templateDirPath, STYLE_COMMON_HTML, path);
 	addFile(ofs, path);
 
-	wcscpy(path, templateDirPath);
-	wcscat(path, STYLE_JQUERY_HTML);
+	strmarge(templateDirPath, STYLE_JQUERY_HTML, path);
 	addFile(ofs, path);
 
 	if (options.standardUI || options.toolBar) {
-		wcscpy(path, templateDirPath);
-		wcscat(path, STYLE_VIEWER_DIALOGS_HTML);
+		strmarge(templateDirPath, STYLE_VIEWER_DIALOGS_HTML, path);
 		addFile(ofs, path);
 	}
 
-	wcscpy(path, templateDirPath);
-	wcscat(path, STYLE_JQUERY_MINICOLORS_HTML);
+	strmarge(templateDirPath, STYLE_JQUERY_MINICOLORS_HTML, path);
 	addFile(ofs, path);
 
-	wcscpy(path, templateDirPath);
-	wcscat(path, STYLE_RELATIONSHIPA_HTML);
+	strmarge(templateDirPath, STYLE_RELATIONSHIPA_HTML, path);
 	addFile(ofs, path);
 
 	if (options.customScript) {
-		wcscpy(path, templateDirPath);
-		wcscat(path, CUSTOM_STYLE_SCRIPT_HTML);
+		strmarge(templateDirPath, CUSTOM_STYLE_SCRIPT_HTML, path);
 		addFile(ofs, path);
 	}
 
-	wcscpy(path, templateDirPath);
-	wcscat(path, SCRIPT_START_VIEWER_HTML);
+	strmarge(templateDirPath, SCRIPT_START_VIEWER_HTML, path);
 	ifs.open(path);
 	while (getline(ifs, str)) 
 	{
-		if (str == "//BEFORE_START_VIEWER") {
+		if (0 == strncmp(str.data(), "//BEFORE_START_VIEWER", 21))
+		{
 			if (options.standardUI) {
 				ofs << "    ui = new Communicator.Ui.Desktop.DesktopUi(hwv, {" << endl;
 				ofs << "        containerId: \"content\"," << endl;
@@ -159,8 +162,7 @@ void HtmlTemplateBuilder::Create(const wchar_t *templateDirPath)
 			}
 
 			if (options.customScriptBeforeStartViewer) {
-				wcscpy(path, templateDirPath);
-				wcscat(path, CUSTOM_SCRIPT_BEFORE_START_VIEWER);
+				strmarge(templateDirPath, CUSTOM_SCRIPT_BEFORE_START_VIEWER, path);
 				addFile(ofs, path);
 			}
 		}
@@ -174,24 +176,20 @@ void HtmlTemplateBuilder::Create(const wchar_t *templateDirPath)
 
 	if (options.standardUI || options.toolBar)
 	{
-		wcscpy(path, templateDirPath);
-		wcscat(path, BODY_TOOLBAR_HTML);
+		strmarge(templateDirPath, BODY_TOOLBAR_HTML, path);
 		addFile(ofs, path);
 
-		wcscpy(path, templateDirPath);
-		wcscat(path, BODY_VIEWERSETTINGS_HTML);
+		strmarge(templateDirPath, BODY_VIEWERSETTINGS_HTML, path);
 		addFile(ofs, path);
 	}
 
 	if (options.standardUI) {
-		wcscpy(path, templateDirPath);
-		wcscat(path, BODY_SNAPSHOT_DIALOG_HTML);
+		strmarge(templateDirPath, BODY_SNAPSHOT_DIALOG_HTML, path);
 		addFile(ofs, path);
 	}
 
 	if (options.customBody) {
-		wcscpy(path, templateDirPath);
-		wcscat(path, CUSTOM_BODY_HTML);
+		strmarge(templateDirPath, CUSTOM_BODY_HTML, path);
 		addFile(ofs, path);
 	}
 
